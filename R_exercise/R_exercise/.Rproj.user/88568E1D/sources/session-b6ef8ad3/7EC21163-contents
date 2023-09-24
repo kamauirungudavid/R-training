@@ -1,0 +1,208 @@
+---
+title: "Exercise"
+author: "DK"
+date: "2023-09-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Introduction
+
+We trust you had a fruitful experience during the first training session in R. To continue our commitment to your R-skill development, we are excited to invite you to a interactive post-training exercise session.
+
+This exercise session is designed specifically for participants like you who are eager to reinforce their R skills while maintaining a healthy work-life balance. This is not a test, instead it's an opportunity to reinforce your understanding of R and gain practical experience in a supportive and relaxed environment. 
+
+After all participants have attempted the exercise, we will have a session and go through all the questions before the second session begins (## time = t)
+
+### Open a new R-project
+1. Click on "File" in the top menu bar.
+
+2. Select "New Project..."
+
+3. Choose "New Directory."
+
+4. Select "Empty Project." and give a name to your project
+
+5. Click "Create project."
+
+Download the data shared `GDPOutputData.xlsx` and `Sector.csv` and save them into a folder called data(create this folder inside your project)
+Create an R file and save it as `main.R` (Your project should look like the screenshot below.)
+
+
+```{r, echo=FALSE, out.width = "50%", out.height="70%",fig.align="center" }
+knitr::include_graphics("./image1.png")
+```
+
+### loading libraries
+Open `main.R`.
+
+Load the following libraries `readxl` for reading `.xlsx` files, `lubridate` helps us to handle date and time variables, `dplyr` helps with data manipulation/wrangling, `tidyr` helps us create tidy data.
+
+Use `install.packages('packagename)` in case the package is not available. 
+
+Example
+```{r pressure, echo=T}
+library(readxl) 
+```
+
+### To Dos
+***To do 1***
+
+* Read the two datasets provided and label them `gdp` and `sector` accordingly
+
+  + ***Hint:*** `gdp <- read_excel('path',sheet = 'sheet_name')`
+
+  + ***Hint:*** `sector <- read.csv('path')`
+
+* Use `head()` to view the first 5 observations to make sure you've read your data well. Specify the structure of the two datasets, use `dim()` function. 
+
+* Convert `Date` into a date object `gdp$Date <- as.Date(gdp$Date)` #This should give you an idea of how to change data types in R.
+
+***To do 2***
+
+* Use select function from `dplyr` to create a new dataframe named `df1` containing `Date`, `TOTAL`, `A`,`F` and `H` columns from `gdp`. 
+  + ***Hint:*** `df1 <- select(data, c(columns to select))`
+
+* Use select function to create a dataframe named `df2` containing the first 5 columns of `gdp`. Use index position. 
+  + ***Hint:*** `df2 <- select(data, c(numbers))` Consider using range.
+
+* Run the following code and comment what it does. 
+  + `df3 <- select(gdp, !c(sector$Code))`.
+  + `d <- select(df3, !matches("[[:digit:]]"))`.
+  + ` head(d)`
+
+
+***To do 3***
+
+* Bullet 3 above can be executed in one nice structure (Think of ` pipe ( %>% )`). Try use pipes and rewrite the above code.
+  + Then rename column `TOTAL` to `GDP`.
+  
+  + Create a new column named `C` which is a square root of column `CC`, columns named `year` and `month` which is the year and month of `Date`. 
+    - ***Hint:*** ` ... mutate(new_col_name = some_execution on existing column(s))`
+    
+  + Filter where `C` is less than or equal to 50. 
+  
+  + Select the columns in; `c('Date','GDP','C','year','month')`
+  
+* The final output should be something like this 
+
+```{r, echo=FALSE, out.width = "80%", out.height="90%",fig.align="center" }
+knitr::include_graphics("./image2.png")
+```
+
+* Save the output into `output_table` folder with the name `first_summary` with `csv` extension. 
+    + ***Hint:*** `write.csv(d, 'folder/name.extension')`
+
+
+***To do 4***
+
+Use `pipe( %>% )`
+
+* Select `Date`,`TOTAL` and `sector$Code` (All columns that have a code in `sector` dataset) from `gdp`.
+  + Rename column `TOTAL` to `GDP` and create a new column named `GDP_in_1000` and drop the column `GDP`.
+  
+  + Filter the resulting data to have the most recent 10 years of the data and `GDP_in_1000` greater than 300.
+    - ***Hint:*** `filter(year(Date) >= (year(max(Date))-10))`.
+    
+  + Assign `<-` the resulting data to `selected_df`. Use `head(selected_df)` to ensure you have a data that looks like the one below. 
+  
+```{r, echo=FALSE, out.width = "80%", out.height="90%",fig.align="center" }
+knitr::include_graphics("./image3.png")
+``` 
+
+* Using the `selected_df` generated above, use pipe to pivot the dataset so that each observation is in a row using the function `pivot_longer()`.
+  + ***Hint:*** `pivot_longer(cols = -c(Date), names_to = "Code", values_to = "Observation")`
+  
+
+* Left join the resulting data to `sector` dataset by `Code`
+    + ***Hint:*** `left_join(sector, by = 'Code')`
+  
+* Mutate new variables called year which is the year of `Date` and month which is the month of `Date`
+* Assigned the resulting dataset to `joined_df`. 
+
+We should have the following.
+
+```{r, echo=FALSE, out.width = "80%", out.height="90%",fig.align="center" }
+knitr::include_graphics("./image4.png")
+``` 
+
+Save the resulting dataset in the `output_table` folder as a `csv` and name it `second_summary`
+
+* Try to answer the following:
+  + Which year did `AGRICULTURE, FORESTRY AND FISHING` sector had the largest observation?
+  
+  + Filter out `MANUFACTURING` and sum observations for each month.
+  
+  + Which year had the largest GDP?
+  
+  
+***Run***
+
+In preparation for our next session, execute the following code that will summarize the data needed for our data vizualization class. 
+
+
+```{r,  eval=FALSE}
+sectors = read.csv('data/Sectors.csv')
+gdp = read_xlsx('data/GDPOutputData.xlsx', sheet = 'Data')
+
+data_sectors <- gdp %>%
+  select(Date, TOTAL, sectors$Code) %>%
+  mutate(DE = D + E, 
+         AB = A + B) %>%
+  pivot_longer(-Date, names_to = "Code", values_to = "Level") %>% 
+  left_join(sectors, by = "Code") %>% 
+  filter(!Code %in% c('A', 'B', 'D', 'E'))  %>% 
+  group_by(Code) %>% 
+  mutate(Date = as.Date(Date),
+         QoQ = Level/lag(Level, 1)*100-100,
+         YoY = Level/lag(Level, 4)*100-100)
+
+write.csv(data_sectors, "output_table/data_sectors.csv")
+```
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
